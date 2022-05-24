@@ -1,5 +1,3 @@
-#pragma once
-
 #include <vector>
 
 #include "Card.h"
@@ -9,8 +7,11 @@ public:
     int count(Rank);
     void shuffle();
     void sort();
+
     Card draw();
     CardList draw(int);
+    Card draw(Rank);
+
     std::vector<CardList> combinations(int) const;
     CardList operator+ (const CardList&) const;
 
@@ -24,3 +25,5 @@ public:
 
     using std::vector<Card>::push_back;
 };
+
+std::ostream& operator<<(std::ostream&, const CardList&);

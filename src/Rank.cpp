@@ -1,27 +1,38 @@
 #include "Rank.h"
 
-const std::array<std::string, RANK_COUNT> Rank::names{"ace", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king"};
-Rank::Rank(int r) {
-    assert(r >= 0);
-    assert(r < RANK_COUNT);
-    value = r;
+const std::array<std::string,RANK_COUNT> Rank::names = {
+    "ace", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king"
+};
+
+Rank::Rank(std::string name): std::string(name) {
+    for(auto valid_name: names) {
+        if (name == valid_name) {
+            return;
+        }
+    }
+    throw std::domain_error("rank name");
+}
+Rank::Rank(const char* name): Rank(std::string(name)) {
+    // nice
 }
 
-std::string Rank::to_str() const {
-    return names[value];
+bool Rank::operator== (const Rank& other) const {
+    return static_cast<std::string>(*this) == static_cast<std::string>(other);
+}
+bool Rank::operator< (const Rank& other) const {
+    return get_number() < other.get_number();
 }
 
-Rank Rank::operator++ () {
-    assert(value+1 < RANK_COUNT);
-    value++;
-    return Rank(value+1);
-}
-
-bool Rank::operator== (Rank other) const {
-    return value == other.value;
+unsigned int Rank::get_number() const {
+    for(int i=0; i<RANK_COUNT; i++) {
+        if (static_cast<std::string>(*this) == names[i]) {
+            return i;
+        }
+    }
+    throw std::domain_error("impossible rank");
 }
 
 std::ostream& operator<<(std::ostream& os, const Rank& rank) {
-    os << rank.to_str();
+    os << static_cast<std::string>(rank);
     return os;
 }

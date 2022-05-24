@@ -1,14 +1,16 @@
-#pragma once
-
 #include "Rank.h"
 #include "Suit.h"
 
-class Card {
-    Rank rank;
-    Suit suit;
+class Card: std::pair<Rank,Suit> {
 public:
-    Card(Rank, Suit);
-    bool is_rank(Rank);
     std::string to_str() const;
     friend std::ostream& operator<<(std::ostream&, const Card&);
+
+    Rank get_rank() const;
+    Suit get_suit() const;
+
+    bool is_rank(Rank) const;
+    bool is_suit(Suit) const;
+
+    using std::pair<Rank,Suit>::pair;
 };

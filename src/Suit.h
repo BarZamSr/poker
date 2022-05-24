@@ -1,5 +1,3 @@
-#pragma once
-
 #include <set>
 #include <string>
 
@@ -7,10 +5,13 @@
 
 class Suit: std::string {
 public:
+    const static std::set<std::string> names;
+
     using std::string::c_str;
+
     Suit(std::string);
 
-    const static std::set<std::string> names;
-};
+    bool operator==(const Suit&) const;
 
-std::ostream& operator<< (std::ostream&, const Suit&);
+    friend std::ostream& operator<<(std::ostream&, const Suit&);
+};

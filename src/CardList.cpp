@@ -5,8 +5,6 @@
 
 #include "CardList.h"
 
-#define print(X) (std::cout<<X<<std::endl)
-
 std::ostream& operator<<(std::ostream& os, const CardList& cards) {
     os << "[";
     for(int i=0; i<cards.size(); i++) {
@@ -22,7 +20,7 @@ std::ostream& operator<<(std::ostream& os, const CardList& cards) {
 int CardList::count(Rank rank) {
     int retval = 0;
     for(auto& card: *this) {
-        if (card.is_rank(rank)) {
+        if (card.get_rank() == rank) {
             retval++;
         }
     }
@@ -52,6 +50,16 @@ CardList CardList::draw(int n) {
     }
 
     return retval;
+}
+Card CardList::draw(Rank rank) {
+    for(int i=0; i<this->size(); i++) {
+        if ((*this)[i].is_rank(rank)) {
+            Card card = (*this)[i];
+            this->erase(this->begin() + i);
+            return card;
+        }
+    }
+    exit(EXIT_FAILURE);
 }
 
 std::vector<CardList> CardList::combinations(int n) const {

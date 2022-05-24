@@ -1,11 +1,23 @@
 CXX := c++
+
+TARGET ?= main.exe
+SRC_DIRS ?= ./src
+
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp)
+OBJS := $(addsuffix .o,$(basename $(SRCS)))
+DEPS := $(OBJS:.o=.d)
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 CXXFLAGS := -std=gnu++2b -Wall
 
-main.exe: main.cpp Rank.o Suit.o Card.o CardList.o
-	${CXX} ${CXXFLAGS} main.cpp -o main.exe
+$(TARGET): $(OBJS)
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
-%.o: %.c
-	${CXX} ${CXXFLAGS} -c %< -o %@
-
+.PHONY: clean
 clean:
-	rm -f *.o *.exe
+	$(RM) $(TARGET) $(OBJS) $(DEPS)
+
+-include $(DEPS)
