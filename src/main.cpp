@@ -8,9 +8,9 @@
 
 bool is_texas(const CardList&);
 
-u_int16_t ranged_product(u_int16_t, u_int16_t);
-int factorial(u_int16_t);
-int binomial_coefficient(int, int);
+unsigned long factorial(unsigned short);
+
+unsigned long nCk(unsigned short, unsigned short);
 
 CardList build_deck() {
     CardList deck = CardList();
@@ -62,10 +62,10 @@ std::vector<std::vector<float>> do_poker(CardList pocket) {
 }
 
 float empirical(
-    int deck_size,
-    int desired_in_deck,
-    int sample_size,
-    int target
+    int N, // population size
+    int n, // sample size
+    int K, // number of favoured items in population
+    int k  // minimum accepted count of favoured items in sample
 ) {
     unsigned int samples_taken = 0, samples_accepted = 0;
     CardList deck;
@@ -73,21 +73,21 @@ float empirical(
     while(true) {
         // building the target population
         deck = build_deck();
-        while(deck.count("ace") > desired_in_deck) {
+        while(deck.count("ace") > K) {
             deck.draw("ace");
         }
-        while(deck.size() > deck_size) {
+        while(deck.size() > N) {
             deck.draw("two"); // making sure to draw some other rank
         }
 
-        assert(deck.size() == deck_size);
-        assert(deck.count("ace") == desired_in_deck);
+        assert(deck.size() == N);
+        assert(deck.count("ace") == K);
 
         deck.shuffle();
 
         // taking and measuring samples
-        while(deck.size() > sample_size) {
-            if (deck.draw(sample_size).count("ace") >= target) {
+        while(deck.size() > n) {
+            if (deck.draw(n).count("ace") >= k) {
                 samples_accepted++;
             }
             samples_taken++;
@@ -98,22 +98,23 @@ float empirical(
         }
     }
 }
-
+/* Implementatio credit goes to Graham Kemp,
+    "At least K successes in n tries without replacement",
+    URL (version: 2016-03-03): math.stackexchange.com/q/1680840
+*/
 float theoretical(
-    int deck_size,
-    int desired_in_deck,
-    int to_draw,
-    int target
+    int N, // population size
+    int n, // sample size
+    int K, // number of favoured items in population
+    int k // minimum accepted count of favoured items in sample
 ) {
-    int product_zero = binomial_coefficient(to_draw, target-1);
-    float product_one = 1;
+    /*
+    float retval = 1;
+
     for(int i=1; i<target; i++) {
-        product_one *= (float)desired_in_deck /
-                                deck_size;
-        desired_in_deck--;
-        deck_size--;
-        to_draw--;
+        retval -= (float)binomial_coefficient()desired_in_deck/deck_size
     }
+
     float product = 1;
     for(int i=0; i<to_draw; i++) {
         product *= (float)(deck_size - desired_in_deck) /
@@ -121,20 +122,25 @@ float theoretical(
         deck_size--;
     }
     return product_one * product_zero* (1-product);
+    */
+    assert(0 <= k <= std::min(n, K));
+    assert(K < N);
+    float retval = 0;
+    for(int x=k; x<=std::min(n, K); x++) {
+        retval += (float)(nCk(K, x) * nCk(N-K, n-x))
+                            / nCk(N, n);
+    }
+    return retval;
 }
 
 int main() {
-    int up, low;
-    while(false) {
-        std::cin >> up;
-        std::cin >> low;
-        print(ranged_product(up, low));
-    }
-
+    // chance of pocket aces
+    print(empirical(52, 2, 4, 2));
+    print(theoretical(52, 2, 4, 2));
+    print(1.f/221);
     CardList deck;
 
-    print(empirical(50, 3, 5, 2));
-    print(theoretical(50, 3, 5, 2));
+
 
     return 0;
 
@@ -161,12 +167,24 @@ bool is_texas(const CardList& pocket) {
     return pocket.size() == TEXAS_HAND_SIZE;
 }
 
-u_int16_t ranged_product(u_int16_t upper_bound, u_int16_t lower_bound) {
-    return (upper_bound < lower_bound) ? 1 : (upper_bound * ranged_product(upper_bound-1, lower_bound));
+unsigned long factorial(unsigned short n) {
+    return (n<2) ? 1 : (n*factorial(n-1));
 }
-int factorial(u_int16_t n) {
-    return ranged_product(n, 2);
-}
-int binomial_coefficient(int n, int k) {
-    return ranged_product(n, n-k+1) / factorial(k);
+// implementation credit goes to wikipedia page on the Binomial Coefficient
+unsigned long nCk(unsigned short n, unsigned short k) {
+    unsigned long c = 1, i;
+
+    // take advantage of symmetry
+    if (k > n-k)
+    k = n-k;
+
+    for (i = 1; i <= k; i++, n--) {
+        // return 0 on potential overflow
+        if (c/i >= ULONG_MAX/n) return 0;
+
+        // split c * n / i into (c / i * i + c % i) * n / i
+        c = c / i * n + c % i * n / i;
+    }
+
+    return c;
 }
