@@ -13,10 +13,15 @@ public:
     Rank(std::string);
     Rank(const char*);
 
+    operator int() const;
     bool operator== (const Rank&) const;
     bool operator< (const Rank&) const;
 
-    unsigned int get_number() const;
-
     friend std::ostream& operator<<(std::ostream&, const Rank&);
+};
+
+template<>
+class std::hash<Rank> {
+public:
+    std::size_t operator()(const Rank& k) const;
 };
