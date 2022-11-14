@@ -10,15 +10,10 @@
 
 bool is_texas(const CardList&);
 
-unsigned long factorial(unsigned short);
+int factorial(int);
 
-unsigned long binomial(unsigned short, unsigned short);
-float hypergeometric(
-    unsigned short,
-    unsigned short,
-    unsigned short,
-    unsigned short
-);
+int binomial(int, int);
+float hypergeometric(int, int, int, int);
 
 CardList build_deck() {
     CardList deck = CardList();
@@ -33,16 +28,19 @@ CardList build_deck() {
 }
 
 dict<Rank,float> pair(CardList);
+void two_pair(CardList);
 
 void do_poker(CardList);
 
-int main() 
-    print();
+int main() {
     CardList deck;
+
     deck = build_deck();
     deck.shuffle();
+
     CardList board;
     CardList pocket = deck.draw(TEXAS_HAND_SIZE);
+
     do_poker(pocket);
 
     return 0;
@@ -70,7 +68,7 @@ void do_poker(CardList pocket) {
 dict<Rank,float> pair(CardList pocket) {
     assert(is_texas(pocket));
 
-    CardList hand = pocket;
+    CardList hand = pocket; // TODO: table
     int count;
     dict<Rank,float> retval;
 
@@ -91,16 +89,19 @@ dict<Rank,float> pair(CardList pocket) {
     return retval;
 }
 
+void two_pair(CardList pocket) {
+    assert(is_texas(pocket));
+
+
+}
+
 bool is_texas(const CardList& pocket) {
     return pocket.size() == TEXAS_HAND_SIZE;
 }
 
-unsigned long factorial(unsigned short n) {
-    return (n<2) ? 1 : (n*factorial(n-1));
-}
 // implementation credit goes to wikipedia page on the Binomial Coefficient
-unsigned long binomial(unsigned short n, unsigned short k) {
-    unsigned long c = 1, i;
+int binomial(int n, int k) {
+    int c = 1, i;
 
     // take advantage of symmetry
     if (k > n-k)
@@ -117,15 +118,15 @@ unsigned long binomial(unsigned short n, unsigned short k) {
     return c;
 }
 
-/* Implementatio credit goes to Graham Kemp,
+/* Implementation credit goes to Graham Kemp,
 "At least K successes in n tries without replacement",
 URL (version: 2016-03-03): math.stackexchange.com/q/1680840
 */
 float hypergeometric(
-    unsigned short N, // population size
-    unsigned short n, // sample size
-    unsigned short K, // number of favoured items in population
-    unsigned short k  // minimum accepted count of favoured items in sample
+    int N, // population size
+    int n, // sample size
+    int K, // number of favoured items in population
+    int k  // minimum accepted count of favoured items in sample
 ) {
     assert(0 <= k <= std::min(n, K));
     assert(K <= N);
